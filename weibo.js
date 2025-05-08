@@ -13,7 +13,7 @@ async function postWeibo(text) {
   await page.goto('https://weibo.com/');
 
   // 等待页面加载并定位发微博的输入框
-  await page.waitForSelector('textarea'); // 请根据实际情况调整选择器
+  await page.waitForSelector('textarea', { timeout: 60000 }); // 等待 60 秒
   await page.fill('textarea', text);
   await page.click('button[type="submit"]'); // 请根据实际情况调整选择器
 
