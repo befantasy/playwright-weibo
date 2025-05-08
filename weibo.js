@@ -1,22 +1,23 @@
 const { chromium } = require('playwright');
-const fs = require('fs');
 
 async function postWeibo(text) {
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
 
-  // 加载已保存的 cookies
-  const cookies = JSON.parse(fs.readFileSync('cookies.json', 'utf-8'));
-  await context.addCookies(cookies);
+  const context = await browser.newContext({
+    storageState: 'cookies.json' // 使用扫码登录保存的文件
+  });
 
   const page = await context.newPage();
-  await page.goto('https://weibo.com/');
+  await page.goto('https://weibo.com/', { waitUntil: 'networkidle' });
 
-  // 等待页面加载并定位发微博的输入框
-  await page.waitForSelector('textarea', { timeout: 30000 }); // 等待 60 秒
-  await page.fill('textarea', text);
-  await page.click('button[type="submit"]'); // 请根据实际情况调整选择器
+  // 等待并填写微博内容
+  await page.waitForSelector('[placeholder="有什么新鲜事想分享"]', { timeout: 30000 });
+  await page.fill('[placeholder="有什么新鲜事想分享"]', text);
 
+  // 点击发布按钮
+  await page.click('text=发布');
+
+  await page.waitForTimeout(3000); // 稍等几秒确认发布成功
   await browser.close();
 }
 
